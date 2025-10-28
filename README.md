@@ -118,7 +118,7 @@ Then open your browser to `http://localhost:5000`
 
 ### Web Interface
 
-1. **Filter Tables** - Click the filter icon (🔍) to narrow down your table list:
+1. **Filter Tables** - Click the filter icon to narrow down your table list:
    - Filter by source platform (BigQuery, Snowflake)
    - Filter by source project
    - Filter by database
@@ -137,7 +137,7 @@ Then open your browser to `http://localhost:5000`
    - Column filter patterns (potential partition candidates)
    - Table metadata (size, row count, columns)
 
-4. **Configuration Panel** - Click the gear icon (⚙️) to manage data:
+4. **Configuration Panel** - Click the gear icon to manage data:
    - **Refresh Query History** - Pull latest queries from your warehouse
    - **Refresh Tables Metadata** - Update table information
    - **Run Analysis** - Analyze stored queries to identify patterns (requires platform and project selection)
