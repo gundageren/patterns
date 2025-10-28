@@ -1,0 +1,28 @@
+{
+  "source_platform": "bigquery",
+  "connection": {
+    "parameters": {
+      "project_id": "your-project-id",
+      "region": "your-region",
+      "credentials_path": "credentials/bigquery-service-account.json"
+    }
+  },
+  "storage": {
+    "type": "duckdb",
+    "db_path": "data/patterns.duckdb"
+  },
+  "gemini": {
+    "api_key": "your-gemini-api-key",
+    "model": "gemini-2.5-flash"
+  },
+  "_comment": "Authentication methods (choose one):",
+  "_auth_method_1": "Service account file (recommended): specify 'credentials_path'",
+  "_auth_method_2": "Application Default Credentials (ADC): leave 'parameters' empty or use 'project_id' only",
+  "_auth_method_3": "Environment variable: set GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json",
+  "_example_adc": {
+    "parameters": {
+      "project_id": "your-project-id"
+    }
+  }
+}
+

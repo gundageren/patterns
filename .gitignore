@@ -1,0 +1,28 @@
+.idea/
+__pycache__
+.DS_Store
+
+# Credentials and config files
+config.json
+config_*.json
+credentials/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Data files
+data/
+*.duckdb
+*.duckdb.wal
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/

@@ -1,0 +1,32 @@
+{
+  "source_platform": "snowflake",
+  "connection": {
+    "parameters": {
+      "account": "your-account.region",
+      "user": "your-username",
+      "role": "YOUR_ROLE",
+      "warehouse": "YOUR_WAREHOUSE"
+    }
+  },
+  "storage": {
+    "type": "duckdb",
+    "db_path": "data/patterns.duckdb"
+  },
+  "gemini": {
+    "api_key": "your-gemini-api-key",
+    "model": "gemini-2.5-flash"
+  },
+  "_comment": "Authentication methods (add one of the following to 'parameters'):",
+  "_auth_method_1_sso": {
+    "authenticator": "externalbrowser"
+  },
+  "_auth_method_2_keypair": {
+    "private_key_path": "credentials/snowflake_private_key.pem",
+    "private_key_passphrase": "optional-passphrase"
+  },
+  "_auth_method_3_password": {
+    "password": "your-password"
+  },
+  "_auth_method_4_env_vars": "Set SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, etc."
+}
+

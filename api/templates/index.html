@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Patterns</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon.png') }}">
+  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css?family=Raleway:400,400i,700");
+
+    :root {
+      --font-size: 20px;
+      --frame-color: #000000;
+      --size: 2.5em;
+      --open-width: 50vw;
+      --open-padding: 0.3em 2.1em 0.3em 0.4em;
+      --frame-thickness: 0.3em;
+      --handle-height: 1.4em;
+      --open-trans-time: 800ms;
+      --close-trans-time: 150ms;
+    }
+
+    html, body {
+      font-family: Raleway, sans-serif;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      flex-wrap: nowrap;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: white;
+      flex-direction: column;
+      gap: 0.5em;
+      padding-top: 0;
+      padding-bottom: 2em;
+    }
+
+    .main-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5em;
+      margin-top: calc(10vh - 2.5em);
+    }
+
+    /* Top Right Icons */
+    .gear-icon-wrapper {
+      position: fixed;
+      top: 1em;
+      right: 1em;
+      z-index: 1000;
+    }
+
+    .gear-icon {
+      width: var(--size);
+      height: var(--size);
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .gear-icon:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    .filter-icon-wrapper {
+      position: fixed;
+      top: 1em;
+      right: calc(1em + var(--size) + 0.5em);
+      z-index: 1000;
+    }
+
+    /* Search Container */
+    .search-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .search-box {
+      font-size: var(--font-size);
+      border: solid var(--frame-thickness) var(--frame-color);
+      display: inline-block;
+      position: relative;
+      border-radius: var(--size);
+    }
+
+    .search-box input[type="text"] {
+      font-family: inherit;
+      font-weight: bold;
+      width: var(--size);
+      height: var(--size);
+      padding: var(--open-padding);
+      border: none;
+      box-sizing: border-box;
+      border-radius: var(--size);
+      transition:
+        width var(--open-trans-time) cubic-bezier(0.68, -0.55, 0.27, 1.55) var(--close-trans-time);
+    }
+
+    .search-box input[type="text"]:focus {
+      outline: none;
+    }
+
+    .search-box input[type="text"]:focus,
+    .search-box input[type="text"]:not(:placeholder-shown) {
+      width: var(--open-width);
+      transition: width var(--open-trans-time) cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+
+    .search-box input[type="text"]:focus + button[type="reset"],
+    .search-box input[type="text"]:not(:placeholder-shown) + button[type="reset"] {
+      transform: rotate(-45deg) translateY(0);
+      transition:
+        transform var(--close-trans-time) ease-out var(--open-trans-time);
+    }
+
+    .search-box input[type="text"]:focus + button[type="reset"]:after,
+    .search-box input[type="text"]:not(:placeholder-shown) + button[type="reset"]:after {
+      opacity: 1;
+      transition:
+        top var(--close-trans-time) ease-out calc(var(--open-trans-time) + var(--close-trans-time)),
+        right var(--close-trans-time) ease-out calc(var(--open-trans-time) + var(--close-trans-time)),
+        opacity var(--close-trans-time) ease calc(var(--open-trans-time) + var(--close-trans-time));
+    }
+
+    .search-box button[type="reset"] {
+      background-color: transparent;
+      width: var(--handle-height);
+      height: var(--handle-height);
+      border: 0;
+      padding: 0;
+      outline: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      top: calc((var(--size) / 2) - (var(--handle-height) / 2));
+      right: calc((var(--size) / 2) - (var(--handle-height) / 2));
+      transform: rotate(-45deg) translateY(calc(var(--size) - var(--frame-thickness)));
+      transition:
+        transform var(--close-trans-time) ease-out var(--close-trans-time);
+      cursor: pointer;
+    }
+
+    .search-box button[type="reset"]:before,
+    .search-box button[type="reset"]:after {
+      content: "";
+      background-color: var(--frame-color);
+      width: var(--frame-thickness);
+      height: var(--handle-height);
+      position: absolute;
+    }
+
+    .search-box button[type="reset"]:after {
+      transform: rotate(90deg);
+      opacity: 0;
+      transition:
+        transform var(--close-trans-time) ease-out,
+        opacity var(--close-trans-time) ease-out;
+    }
+
+    /* Filter Icon Button */
+    .filter-icon-btn {
+      width: var(--size);
+      height: var(--size);
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      padding: 0;
+      box-sizing: border-box;
+      opacity: 0.7;
+    }
+
+    .filter-icon-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .filter-icon-btn:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    .filter-icon-btn.active {
+      opacity: 1;
+    }
+
+    .filter-icon-btn.active img {
+      filter: brightness(0);
+    }
+
+    /* Panels */
+    .gear-panel, .filter-panel {
+      position: absolute;
+      top: calc(100% + 0.5em);
+      right: 0;
+      width: 20em;
+      background: white;
+      border: solid var(--frame-thickness) var(--frame-color);
+      border-radius: 1em;
+      padding: 1em;
+      box-sizing: border-box;
+      display: none;
+      z-index: 999;
+    }
+
+    .gear-panel.show, .filter-panel.show {
+      display: block;
+    }
+
+    .gear-panel h4, .filter-panel h4 {
+      margin: 0 0 0.5em 0;
+      font-size: 0.9em;
+      font-weight: 700;
+    }
+
+    .gear-panel label, .filter-panel label {
+      display: block;
+      font-size: 0.7em;
+      margin-bottom: 0.3em;
+      font-weight: 600;
+    }
+
+    .gear-panel select, .filter-panel select {
+      width: 100%;
+      padding: 0.5em;
+      font-family: inherit;
+      font-size: 0.75em;
+      border: solid 2px var(--frame-color);
+      border-radius: 0.5em;
+      background: white;
+      margin-bottom: 0.7em;
+    }
+
+    .gear-panel .button-group, .filter-panel .button-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5em;
+      margin-top: 1em;
+    }
+
+    .gear-panel button, .filter-panel button {
+      padding: 0.6em;
+      font-family: inherit;
+      font-size: 0.75em;
+      font-weight: 700;
+      border: solid 2px var(--frame-color);
+      border-radius: 0.5em;
+      background: white;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .gear-panel button:hover, .filter-panel button:hover {
+      background: #f0f0f0;
+    }
+
+    .gear-panel button.full-width, .filter-panel button.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .gear-panel .status, .filter-panel .status {
+      font-size: 0.65em;
+      padding: 0.5em;
+      border-radius: 0.5em;
+      margin-top: 0.5em;
+      display: none;
+    }
+
+    .gear-panel .status.show, .filter-panel .status.show {
+      display: block;
+    }
+
+    .gear-panel .status.success, .filter-panel .status.success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .gear-panel .status.error, .filter-panel .status.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .gear-panel .status.loading, .filter-panel .status.loading {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .gear-panel .checkbox-label {
+      display: flex;
+      align-items: center;
+      font-size: 0.75em;
+      font-weight: 400;
+      margin-bottom: 0.7em;
+      cursor: pointer;
+    }
+
+    .gear-panel .checkbox-label input[type="checkbox"] {
+      width: 1.2em;
+      height: 1.2em;
+      margin-right: 0.5em;
+      cursor: pointer;
+    }
+
+    .gear-panel .date-range {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      margin-bottom: 0.7em;
+    }
+
+    .gear-panel .date-range input[type="date"] {
+      flex: 1;
+      padding: 0.5em;
+      font-family: inherit;
+      font-size: 0.7em;
+      border: solid 2px var(--frame-color);
+      border-radius: 0.5em;
+      background: white;
+    }
+
+    .gear-panel .date-range span {
+      font-size: 0.7em;
+      color: #666;
+    }
+
+    .gear-panel .refresh-btn {
+      width: 100%;
+      padding: 0.7em;
+      margin-top: 0.5em;
+      font-family: inherit;
+      font-size: 0.8em;
+      font-weight: 700;
+      border: solid 2px var(--frame-color);
+      border-radius: 0.5em;
+      background: white;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .gear-panel .refresh-btn:hover {
+      background: #f0f0f0;
+    }
+
+    #dropdown {
+      position: relative;
+      width: var(--open-width);
+      max-height: 12em;
+      overflow-y: auto;
+      border: solid var(--frame-thickness) var(--frame-color);
+      border-radius: 0 0 var(--size) var(--size);
+      font-weight: bold;
+      font-family: inherit;
+      box-sizing: border-box;
+      user-select: none;
+      background: white;
+      margin-top: -0.3em;
+    }
+
+    #dropdown .dropdown-item {
+      padding: 0.25em 0.6em;
+      cursor: pointer;
+      border-bottom: 1px solid #ddd;
+      text-transform: uppercase;
+    }
+
+    #dropdown .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    #dropdown .dropdown-item:hover,
+    #dropdown .dropdown-item:focus {
+      background: #f0f0f0;
+      outline: none;
+    }
+
+    #dropdown .dropdown-item > div {
+      border: none;
+      border-bottom: none;
+    }
+
+    .table-name {
+      font-weight: 600;
+      font-size: 0.9em;
+      margin-bottom: 0.05em;
+      line-height: 1.2;
+      border: none;
+    }
+
+    .table-meta {
+      font-size: 0.6em;
+      color: #666;
+      line-height: 1;
+      margin: 0;
+      padding: 0;
+      border: none;
+    }
+
+    #recommendations {
+      width: var(--open-width);
+      max-width: 90vw;
+      border: solid var(--frame-thickness) var(--frame-color);
+      border-radius: var(--size);
+      font-family: inherit;
+      font-weight: normal;
+      padding: 1em;
+      box-sizing: border-box;
+      background: white;
+      color: #000;
+      margin-bottom: 2em;
+    }
+
+    #recommendations h3 {
+      margin-top: 0;
+      font-weight: 700;
+    }
+
+    #recommendations p {
+      margin: 0.3em 0;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2em;
+      font-style: italic;
+      color: #666;
+    }
+
+    /* Markdown content styling */
+    .markdown-content {
+      line-height: 1.6;
+    }
+
+    .markdown-content h1,
+    .markdown-content h2,
+    .markdown-content h3 {
+      margin-top: 1em;
+      margin-bottom: 0.5em;
+    }
+
+    .markdown-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1em 0;
+    }
+
+    .markdown-content table th,
+    .markdown-content table td {
+      padding: 0.5em;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    .markdown-content table th {
+      background: #f8f9fa;
+      font-weight: 700;
+    }
+
+    .markdown-content code {
+      background: #f4f4f4;
+      padding: 0.2em 0.4em;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+
+    .markdown-content pre {
+      background: #f4f4f4;
+      padding: 1em;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    .markdown-content ul,
+    .markdown-content ol {
+      margin-left: 1.5em;
+    }
+
+    .markdown-content blockquote {
+      border-left: 4px solid #000;
+      padding-left: 1em;
+      margin: 1em 0;
+      color: #666;
+    }
+
+    details {
+      margin-top: 1em;
+      padding: 0.5em;
+      border: 1px solid #ddd;
+      border-radius: 0.5em;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 700;
+      padding: 0.3em;
+    }
+
+    summary:hover {
+      background: #f0f0f0;
+    }
+
+    details pre {
+      font-size: 0.75em;
+      background: #f8f9fa;
+      padding: 0.5em;
+      border-radius: 0.3em;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Right Icons -->
+  <!-- Gear Icon -->
+  <div class="gear-icon-wrapper">
+    <img src="{{ url_for('static', filename='images/gear.png') }}" class="gear-icon" alt="Settings" onclick="toggleGearPanel()" />
+    
+    <!-- Gear Panel -->
+    <div class="gear-panel" id="gearPanel">
+      <h4>Data Refresh</h4>
+      
+      <label class="checkbox-label">
+        <input type="checkbox" id="refresh_query_history" checked>
+        <span>Query History</span>
+      </label>
+      
+      <label class="checkbox-label">
+        <input type="checkbox" id="refresh_tables" checked>
+        <span>Tables Metadata</span>
+      </label>
+      
+      <label class="checkbox-label">
+        <input type="checkbox" id="refresh_analysis">
+        <span>Analysis</span>
+      </label>
+      
+      <label>Date Range:</label>
+      <div class="date-range">
+        <input type="date" id="start_date" />
+        <span>to</span>
+        <input type="date" id="end_date" />
+      </div>
+      
+      <!-- Analysis parameters -->
+      <label>Analysis Platform:</label>
+      <select id="analysis_source_platform" disabled>
+        <option value="">Select platform</option>
+      </select>
+
+      <label>Analysis Source Project:</label>
+      <select id="analysis_source_project" disabled>
+        <option value="">Select project</option>
+      </select>
+      
+      <button onclick="performRefresh()" class="refresh-btn">Refresh</button>
+      
+      <label class="checkbox-label">
+        <input type="checkbox" id="debug_mode">
+        <span>Debug Mode (Show AI Prompt)</span>
+      </label>
+      
+      <div class="status" id="gearStatus"></div>
+    </div>
+  </div>
+  
+  <!-- Filter Icon -->
+  <div class="filter-icon-wrapper">
+        <div class="filter-icon-btn" id="filterIconBtn" onclick="toggleFilterPanel()">
+          <img src="{{ url_for('static', filename='images/filter.png') }}" alt="Filter" />
+        </div>
+
+      <!-- Filter Panel -->
+      <div class="filter-panel" id="filterPanel">
+        <h4>Filters</h4>
+        <label>Platform:</label>
+        <select id="filter_platform">
+          <option value="">All</option>
+        </select>
+        
+        <label>Project:</label>
+        <select id="filter_project">
+          <option value="">All</option>
+        </select>
+        
+        <label>Database:</label>
+        <select id="filter_database">
+          <option value="">All</option>
+        </select>
+        
+        <label>Schema:</label>
+        <select id="filter_schema">
+          <option value="">All</option>
+        </select>
+        
+        <label>Target Warehouse:</label>
+        <select id="filter_warehouse">
+          <option value="">None</option>
+        </select>
+      </div>
+    </div>
+
+  <div class="main-container">
+    <div class="search-container">
+  <form class="search-box" autocomplete="off" onsubmit="return false;">
+    <input id="search-input" type="text" placeholder=" " aria-label="Search tables" />
+    <button id="reset-btn" type="reset" aria-label="Clear search"></button>
+  </form>
+    </div>
+
+  <div id="dropdown" role="listbox" aria-label="Search results" style="display:none;"></div>
+  <div id="recommendations" style="display:none;"></div>
+  </div>
+
+  <script>
+    // Configure marked
+    marked.setOptions({
+      breaks: true,
+      gfm: true,
+      headerIds: true,
+      mangle: false,
+      sanitize: false
+    });
+
+    const input = document.getElementById('search-input');
+    const dropdown = document.getElementById('dropdown');
+    const recommendations = document.getElementById('recommendations');
+    const resetBtn = document.getElementById('reset-btn');
+    const filterPanel = document.getElementById('filterPanel');
+    const filterIconBtn = document.getElementById('filterIconBtn');
+
+    let allTables = [];
+    let filteredTables = [];
+    let selectedIndex = -1;
+    let selectedTable = null;
+    let currentFilters = {
+      platform: '',
+      project: '',
+      database: '',
+      schema: '',
+      warehouse: ''
+    };
+
+    // Toggle filter panel
+    function toggleFilterPanel() {
+      filterPanel.classList.toggle('show');
+      filterIconBtn.classList.toggle('active');
+      // Close gear panel if open
+      const gearPanel = document.getElementById('gearPanel');
+      if (gearPanel.classList.contains('show')) {
+        gearPanel.classList.remove('show');
+      }
+    }
+
+    function toggleGearPanel() {
+      const gearPanel = document.getElementById('gearPanel');
+      gearPanel.classList.toggle('show');
+      // Close filter panel if open
+      if (filterPanel.classList.contains('show')) {
+        filterPanel.classList.remove('show');
+        filterIconBtn.classList.remove('active');
+      }
+
+      // Enable/disable analysis selects based on checkbox
+      const analysisChecked = document.getElementById('refresh_analysis').checked;
+      document.getElementById('analysis_source_platform').disabled = !analysisChecked;
+      document.getElementById('analysis_source_project').disabled = !analysisChecked;
+    }
+
+    // Close panels when clicking outside
+    document.addEventListener('click', (e) => {
+      const gearPanel = document.getElementById('gearPanel');
+      const gearIcon = document.querySelector('.gear-icon');
+      
+      if (!filterPanel.contains(e.target) && !filterIconBtn.contains(e.target)) {
+        filterPanel.classList.remove('show');
+        filterIconBtn.classList.remove('active');
+      }
+      
+      if (gearPanel && !gearPanel.contains(e.target) && !gearIcon.contains(e.target)) {
+        gearPanel.classList.remove('show');
+      }
+    });
+
+    // Load all tables
+    async function loadTables() {
+      try {
+        const res = await fetch('/list-tables');
+        const data = await res.json();
+        if (data.success && data.tables) {
+          allTables = data.tables;
+          
+          // Populate platform filter
+          const platforms = [...new Set(allTables.map(t => t.source_platform).filter(Boolean))];
+          const platformSelect = document.getElementById('filter_platform');
+          platforms.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p;
+            opt.textContent = p;
+            platformSelect.appendChild(opt);
+          });
+
+          // Populate analysis platform options
+          const analysisPlatformSelect = document.getElementById('analysis_source_platform');
+          analysisPlatformSelect.innerHTML = '<option value="">Select platform</option>';
+          platforms.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p;
+            opt.textContent = p;
+            analysisPlatformSelect.appendChild(opt);
+          });
+          
+          updateProjectOptions();
+        }
+      } catch (error) {
+        console.error('Error loading tables:', error);
+      }
+    }
+
+    // Load warehouses
+    async function loadWarehouses() {
+      try {
+        const res = await fetch('/list-warehouses');
+        const data = await res.json();
+        if (data.success && data.warehouses) {
+          const warehouseSelect = document.getElementById('filter_warehouse');
+          data.warehouses.forEach(w => {
+            const opt = document.createElement('option');
+            opt.value = w;
+            opt.textContent = w;
+            warehouseSelect.appendChild(opt);
+          });
+        }
+      } catch (error) {
+        console.error('Error loading warehouses:', error);
+      }
+    }
+
+    // Update project options
+    function updateProjectOptions() {
+      let filtered = allTables;
+      if (currentFilters.platform) {
+        filtered = filtered.filter(t => t.source_platform === currentFilters.platform);
+      }
+      
+      const projects = [...new Set(filtered.map(t => t.source_project).filter(Boolean))];
+      const projectSelect = document.getElementById('filter_project');
+      projectSelect.innerHTML = '<option value="">All</option>';
+      projects.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        projectSelect.appendChild(opt);
+      });
+      
+      updateDatabaseOptions();
+    }
+
+    // Update database options
+    function updateDatabaseOptions() {
+      let filtered = allTables;
+      if (currentFilters.platform) {
+        filtered = filtered.filter(t => t.source_platform === currentFilters.platform);
+      }
+      if (currentFilters.project) {
+        filtered = filtered.filter(t => t.source_project === currentFilters.project);
+      }
+      
+      const databases = [...new Set(filtered.map(t => t.database).filter(Boolean))];
+      const databaseSelect = document.getElementById('filter_database');
+      databaseSelect.innerHTML = '<option value="">All</option>';
+      databases.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        databaseSelect.appendChild(opt);
+      });
+      
+      updateSchemaOptions();
+    }
+
+    // Update schema options
+    function updateSchemaOptions() {
+      let filtered = allTables;
+      if (currentFilters.platform) {
+        filtered = filtered.filter(t => t.source_platform === currentFilters.platform);
+      }
+      if (currentFilters.project) {
+        filtered = filtered.filter(t => t.source_project === currentFilters.project);
+      }
+      if (currentFilters.database) {
+        filtered = filtered.filter(t => t.database === currentFilters.database);
+      }
+      
+      const schemas = [...new Set(filtered.map(t => t.schema).filter(Boolean))];
+      const schemaSelect = document.getElementById('filter_schema');
+      schemaSelect.innerHTML = '<option value="">All</option>';
+      schemas.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        schemaSelect.appendChild(opt);
+      });
+    }
+
+    // Filter change handlers
+    document.getElementById('filter_platform').addEventListener('change', (e) => {
+      currentFilters.platform = e.target.value;
+      updateProjectOptions();
+      // Refresh table list immediately
+      input.dispatchEvent(new Event('input'));
+    });
+    // Analysis controls: keep project options in sync with chosen analysis platform
+    document.getElementById('analysis_source_platform').addEventListener('change', (e) => {
+      const platform = e.target.value;
+      const analysisProjectSelect = document.getElementById('analysis_source_project');
+      analysisProjectSelect.innerHTML = '<option value="">Select project</option>';
+      if (!platform) return;
+      const projects = [...new Set(allTables.filter(t => t.source_platform === platform).map(t => t.source_project).filter(Boolean))];
+      projects.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        analysisProjectSelect.appendChild(opt);
+      });
+    });
+
+    document.getElementById('refresh_analysis').addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      document.getElementById('analysis_source_platform').disabled = !enabled;
+      document.getElementById('analysis_source_project').disabled = !enabled;
+    });
+
+    document.getElementById('filter_project').addEventListener('change', (e) => {
+      currentFilters.project = e.target.value;
+      updateDatabaseOptions();
+      // Refresh table list immediately
+      input.dispatchEvent(new Event('input'));
+    });
+
+    document.getElementById('filter_database').addEventListener('change', (e) => {
+      currentFilters.database = e.target.value;
+      updateSchemaOptions();
+      // Refresh table list immediately
+      input.dispatchEvent(new Event('input'));
+    });
+
+    document.getElementById('filter_schema').addEventListener('change', (e) => {
+      currentFilters.schema = e.target.value;
+      // Refresh table list immediately
+      input.dispatchEvent(new Event('input'));
+    });
+
+    document.getElementById('filter_warehouse').addEventListener('change', (e) => {
+      currentFilters.warehouse = e.target.value;
+    });
+
+    // Search input handler
+    input.addEventListener('input', async () => {
+      const q = input.value.trim();
+      if (!q) {
+        dropdown.style.display = 'none';
+        recommendations.style.display = 'none';
+        selectedTable = null;
+        selectedIndex = -1;
+        return;
+      }
+
+      // Filter tables
+      filteredTables = allTables.filter(t => {
+        let matches = t.table && t.table.toLowerCase().includes(q.toLowerCase());
+        
+        if (currentFilters.platform) {
+          matches = matches && t.source_platform === currentFilters.platform;
+        }
+        if (currentFilters.project) {
+          matches = matches && t.source_project === currentFilters.project;
+        }
+        if (currentFilters.database) {
+          matches = matches && t.database === currentFilters.database;
+        }
+        if (currentFilters.schema) {
+          matches = matches && t.schema === currentFilters.schema;
+        }
+        
+        return matches;
+      }).sort((a, b) => {
+        // Sort by table name alphabetically
+        return a.table.localeCompare(b.table);
+      });
+
+      if (filteredTables.length === 0) {
+        dropdown.style.display = 'none';
+        recommendations.style.display = 'none';
+        selectedTable = null;
+        selectedIndex = -1;
+        return;
+      }
+
+      dropdown.innerHTML = '';
+      filteredTables.slice(0, 20).forEach((table, index) => {
+        const div = document.createElement('div');
+        div.className = 'dropdown-item';
+        div.setAttribute('role', 'option');
+        div.tabIndex = 0;
+        
+        // Table name (main text)
+        const tableName = document.createElement('div');
+        tableName.className = 'table-name';
+        tableName.textContent = table.table;
+        div.appendChild(tableName);
+        
+        // Source platform and project (grey text)
+        const platformInfo = document.createElement('div');
+        platformInfo.className = 'table-meta';
+        platformInfo.textContent = `${table.source_platform} • ${table.source_project}`;
+        div.appendChild(platformInfo);
+        
+        // Database and schema (grey text)
+        const dbInfo = document.createElement('div');
+        dbInfo.className = 'table-meta';
+        dbInfo.textContent = `${table.database}.${table.schema}`;
+        div.appendChild(dbInfo);
+        
+        div.addEventListener('click', () => selectTable(index));
+        div.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            selectTable(index);
+          }
+        });
+        dropdown.appendChild(div);
+      });
+      selectedIndex = -1;
+      dropdown.style.display = 'block';
+      recommendations.style.display = 'none';
+      selectedTable = null;
+    });
+
+    // Keyboard navigation
+    input.addEventListener('keydown', (e) => {
+      if (dropdown.style.display === 'block') {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectedIndex = (selectedIndex + 1) % Math.min(filteredTables.length, 20);
+          updateFocus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectedIndex = (selectedIndex - 1 + Math.min(filteredTables.length, 20)) % Math.min(filteredTables.length, 20);
+          updateFocus();
+        } else if (e.key === 'Enter' && selectedIndex >= 0) {
+          e.preventDefault();
+          selectTable(selectedIndex);
+        }
+      }
+    });
+
+    // Reset button
+    resetBtn.addEventListener('click', () => {
+      input.value = '';
+      dropdown.style.display = 'none';
+      recommendations.style.display = 'none';
+      selectedTable = null;
+      selectedIndex = -1;
+      input.focus();
+    });
+
+    function updateFocus() {
+      const options = dropdown.querySelectorAll('div');
+      options.forEach((opt, i) => {
+        if (i === selectedIndex) {
+          opt.focus();
+        }
+      });
+    }
+
+    // Select table and trigger AI analysis
+    async function selectTable(index) {
+      const table = filteredTables[index];
+      selectedTable = table;
+      input.value = table.table;
+      dropdown.style.display = 'none';
+
+      recommendations.innerHTML = '<div class="loading">Thinking...</div>';
+      recommendations.style.display = 'block';
+
+      try {
+        const params = new URLSearchParams({
+          source_platform: table.source_platform,
+          source_project: table.source_project,
+          database: table.database,
+          schema: table.schema,
+          table: table.table
+        });
+
+        if (currentFilters.warehouse) {
+          params.append('target_warehouse', currentFilters.warehouse);
+        }
+
+        // Check debug mode
+        const debugMode = document.getElementById('debug_mode').checked;
+        if (debugMode) {
+          params.append('debug', 'true');
+        }
+
+        const res = await fetch(`/find-patterns?${params}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success && data.ai_suggestions) {
+          const fullTableName = `${table.database}.${table.schema}.${table.table}`;
+          let html = `<h3>AI Suggestions for ${fullTableName}</h3>`;
+          html += '<div class="markdown-content">' + marked.parse(data.ai_suggestions) + '</div>';
+          
+          html += '<details>';
+          html += '<summary>View Statistics</summary>';
+          html += '<pre>' + JSON.stringify(data.statistics, null, 2) + '</pre>';
+          html += '</details>';
+          
+          // Display debug info if available
+          if (data.debug && data.debug.prompt) {
+            html += '<details style="margin-top: 1em;">';
+            html += '<summary style="color: #856404; font-weight: 600;">Debug: AI Prompt (' + data.debug.prompt_length + ' chars)</summary>';
+            html += '<div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 0.5em; padding: 1em; margin-top: 0.5em;">';
+            html += '<p style="font-weight: 600; color: #856404; margin-bottom: 0.5em;">Prompt sent to Gemini AI (with anonymized names):</p>';
+            html += '<pre style="font-size: 0.75em; background: #fff; padding: 1em; border-radius: 0.3em; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; max-height: 600px; overflow-y: auto;">' + data.debug.prompt.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+            html += '</div>';
+            html += '</details>';
+          }
+          
+          recommendations.innerHTML = html;
+        } else {
+          recommendations.innerHTML = `<p>Error: ${data.error || 'Failed to get AI suggestions'}</p>`;
+        }
+      } catch (error) {
+        recommendations.innerHTML = `<p>Error: ${error.message}</p>`;
+      }
+
+      recommendations.style.display = 'block';
+    }
+
+    // Helper function for data refresh operations
+    async function refreshData(endpoint, statusId, loadingMsg, method = 'POST') {
+      const statusEl = document.getElementById(statusId);
+      statusEl.textContent = loadingMsg;
+      statusEl.className = 'status loading show';
+
+      try {
+        const res = await fetch(endpoint, { method });
+        const data = await res.json();
+
+        if (data.success) {
+          statusEl.textContent = data.message || 'Success';
+          statusEl.className = 'status success show';
+        } else {
+          statusEl.textContent = data.error || 'Failed';
+          statusEl.className = 'status error show';
+        }
+
+        setTimeout(() => {
+          statusEl.classList.remove('show');
+        }, 5000);
+      } catch (error) {
+        statusEl.textContent = 'Error: ' + error.message;
+        statusEl.className = 'status error show';
+      }
+    }
+
+    // Initialize date range to last 30 days
+    function initializeDateRange() {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+      
+      document.getElementById('end_date').valueAsDate = endDate;
+      document.getElementById('start_date').valueAsDate = startDate;
+    }
+
+    // Perform refresh based on selected options
+    async function performRefresh() {
+      const queryHistory = document.getElementById('refresh_query_history').checked;
+      const tables = document.getElementById('refresh_tables').checked;
+      const analysis = document.getElementById('refresh_analysis').checked;
+      const startDate = document.getElementById('start_date').value;
+      const endDate = document.getElementById('end_date').value;
+      const analysisPlatform = document.getElementById('analysis_source_platform').value;
+      const analysisProject = document.getElementById('analysis_source_project').value;
+      
+      if (!queryHistory && !tables && !analysis) {
+        const statusEl = document.getElementById('gearStatus');
+        statusEl.textContent = 'Please select at least one option';
+        statusEl.className = 'status error show';
+        setTimeout(() => statusEl.classList.remove('show'), 3000);
+        return;
+      }
+
+      const refreshPromises = [];
+      
+      // Process each refresh independently (no automatic analysis)
+      if (queryHistory) {
+        let url = '/refresh-query-history';
+        const params = [];
+        if (startDate && endDate) {
+          params.push(`start_date=${startDate}`);
+          params.push(`end_date=${endDate}`);
+        }
+        // Explicitly disable automatic analysis
+        params.push('run_analysis=false');
+        url += params.length > 0 ? `?${params.join('&')}` : '';
+        refreshPromises.push(refreshData(url, 'gearStatus', 'Refreshing query history...'));
+      }
+      
+      if (tables) {
+        refreshPromises.push(refreshData('/refresh-tables', 'gearStatus', 'Refreshing tables...'));
+      }
+      
+      // First await refresh operations (if any)
+      await Promise.all(refreshPromises);
+
+      // Only run analysis if explicitly requested AND platform/project provided
+      if (analysis) {
+        if (!analysisPlatform || !analysisProject) {
+          const statusEl = document.getElementById('gearStatus');
+          statusEl.textContent = 'Please select Analysis Platform and Project.';
+          statusEl.className = 'status error show';
+          setTimeout(() => statusEl.classList.remove('show'), 3000);
+          return;
+        }
+
+        let url = '/run-analysis';
+        const params = [];
+        if (startDate && endDate) {
+          params.push(`start_date=${startDate}`);
+          params.push(`end_date=${endDate}`);
+        }
+        params.push(`source_platform=${encodeURIComponent(analysisPlatform)}`);
+        params.push(`source_project=${encodeURIComponent(analysisProject)}`);
+        url += `?${params.join('&')}`;
+        await refreshData(url, 'gearStatus', 'Running analysis...', 'POST');
+      }
+      
+      // Reload tables after refresh
+      if (tables || queryHistory) {
+        await loadTables();
+      }
+    }
+
+    // Load UI configuration
+    async function loadUIConfig() {
+      try {
+        const res = await fetch('/ui-config');
+        const data = await res.json();
+        if (data.success && data.disable_ui_config) {
+          const gearIcon = document.querySelector('.gear-icon-wrapper');
+          if (gearIcon) {
+            gearIcon.style.pointerEvents = 'none';
+            gearIcon.style.opacity = '0.3';
+            gearIcon.style.cursor = 'not-allowed';
+            gearIcon.title = 'Configuration is disabled';
+          }
+        }
+      } catch (error) {
+        console.error('Error loading UI config:', error);
+      }
+    }
+
+    // Initialize
+    initializeDateRange();
+    loadTables();
+    loadWarehouses();
+    loadUIConfig();
+  </script>
+</body>
+</html>
