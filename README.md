@@ -230,7 +230,7 @@ poetry run pytest
 
 ## Credits & Acknowledgments
 
-- **CSS Components** - [@takaneichinose](https://codepen.io/takaneichinose) for the search box CSS
+- **CSS Components** - [@takaneichinose](https://codepen.io/takaneichinose) for the search box animations
 - **Magnifying Glass Icon** - [Royyan Wijaya](https://www.flaticon.com/free-icons/magnifying-glass) via Flaticon
 - **Filter Icon** - [joalfa](https://www.flaticon.com/free-icons/filter) via Flaticon
 - **Settings Icon** - [Freepik](https://www.flaticon.com/free-icons/settings) via Flaticon  
